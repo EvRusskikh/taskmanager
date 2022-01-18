@@ -13,11 +13,13 @@ const apiService = new ApiService(API_URL, API_AUTHORIZATION);
 const tasksModel = new TasksModel(apiService);
 
 const siteMenuComponent = new SiteMenuView();
-const filterPresenter = new FilterPresenter(siteMainElement);
+const filterPresenter = new FilterPresenter(siteMainElement, tasksModel);
 const boardPresenter = new BoardPresenter(siteMainElement, tasksModel);
 
-tasksModel.init();
-
-render(siteHeaderElement, siteMenuComponent);
 filterPresenter.init();
 boardPresenter.init();
+
+tasksModel.init().finally(() => {
+  render(siteHeaderElement, siteMenuComponent);
+});
+

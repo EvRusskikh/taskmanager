@@ -7,6 +7,7 @@ import TasksView from '../view/tasks-view';
 import TaskView from '../view/task-view';
 import MoreButtonView from '../view/more-button-view';
 import LoadingView from '../view/loading-view';
+
 const CARDS_STEP_SIZE = 8;
 
 export default class BoardPresenter {
