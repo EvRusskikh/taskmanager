@@ -4,24 +4,26 @@ import BoardView from '../view/board-view';
 import NoTaskView from '../view/no-task-view';
 import SortView from '../view/sort-view';
 import TasksView from '../view/tasks-view';
-import TaskView from '../view/task-view';
 import MoreButtonView from '../view/more-button-view';
 import LoadingView from '../view/loading-view';
+import TaskPresenter from './task-presenter';
 
 const CARDS_STEP_SIZE = 8;
 
 export default class BoardPresenter {
-  #isLoading = true;
-
+  #boardContainer = null;
   #taskModel = null;
 
-  #boardContainer = null;
   #boardComponent = new BoardView();
   #tasksListComponent = new TasksView();
   #sortComponent = new SortView();
-  #moreButtonComponent = new MoreButtonView();
-  #noTasksComponent = null;
   #loadingComponent = new LoadingView();
+  #noTasksComponent = null;
+  #moreButtonComponent = null;
+
+  #renderedTasksCount = CARDS_STEP_SIZE;
+  #renderedTasks = new Map();
+  #isLoading = true;
 
   constructor(boardContainer, taskModel) {
     this.#boardContainer = boardContainer;
@@ -62,30 +64,42 @@ export default class BoardPresenter {
     render(this.#boardComponent, this.#sortComponent);
   }
 
-  #renderTasks = () => {
-    render(this.#boardComponent, this.#tasksListComponent);
-
-    for (let i = 0; i < CARDS_STEP_SIZE; i++) {
-      const task = new TaskView();
-      render(this.#tasksListComponent, task);
-    }
-
+  #renderMoreButton = () => {
+    this.#moreButtonComponent = new MoreButtonView();
     render(this.#boardComponent, this.#moreButtonComponent);
   }
 
+  #renderTask = (task) => {
+    const taskPresenter = new TaskPresenter(this.#tasksListComponent);
+    taskPresenter.init(task);
+    this.#renderedTasks.set(task.id, taskPresenter);
+  }
+
+  #renderTasks = (tasks) => {
+    render(this.#boardComponent, this.#tasksListComponent);
+
+    tasks.forEach((task) => this.#renderTask(task));
+  }
+
   #renderBoard = () => {
+    const tasksCount = this.tasks.length;
+
     if (this.#isLoading) {
       this.#renderLoading();
       return;
     }
 
-    if (this.tasks.length === 0) {
+    if (tasksCount === 0) {
       this.#renderNoTasks();
       return;
     }
 
     this.#renderSort();
-    this.#renderTasks();
+    this.#renderTasks(this.tasks.slice(0, Math.min(tasksCount, this.#renderedTasksCount)));
+
+    if (tasksCount > this.#renderedTasksCount) {
+      this.#renderMoreButton();
+    }
   }
 }
 
