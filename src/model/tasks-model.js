@@ -31,7 +31,7 @@ export default class TasksModel extends AbstractObservable {
       dueDate: task['due_date'] !== null ? new Date(task['due_date']) : task['due_date'],
       isArchived: task['is_archived'],
       isFavorite: task['is_favorite'],
-      repeatingDays: ['repeating_days'],
+      repeatingDays: task['repeating_days'],
     };
 
     delete adaptedTask['due_date'];

@@ -6,3 +6,4 @@ export const isTaskExpiringToday = (dueDate) => dueDate && dayjs(dueDate).isSame
 
 export const isTaskRepeating = (repeating) => Object.values(repeating).some(Boolean);
 
+export const formatDate = (date) => dayjs(date).format('DD MMMM');
