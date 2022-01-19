@@ -64,8 +64,22 @@ export default class BoardPresenter {
     render(this.#boardComponent, this.#sortComponent);
   }
 
+  #handleMoreButtonClick = () => {
+    const taskCount = this.tasks.length;
+    const newRenderedTaskCount = Math.min(taskCount, this.#renderedTasksCount + CARDS_STEP_SIZE);
+    const tasks = this.tasks.slice(this.#renderedTasksCount, newRenderedTaskCount);
+
+    this.#renderTasks(tasks);
+    this.#renderedTasksCount = newRenderedTaskCount;
+
+    if (this.#renderedTasksCount >= taskCount) {
+      remove(this.#moreButtonComponent);
+    }
+  }
+
   #renderMoreButton = () => {
     this.#moreButtonComponent = new MoreButtonView();
+    this.#moreButtonComponent.setClickHandler(this.#handleMoreButtonClick);
     render(this.#boardComponent, this.#moreButtonComponent);
   }
 
@@ -76,8 +90,6 @@ export default class BoardPresenter {
   }
 
   #renderTasks = (tasks) => {
-    render(this.#boardComponent, this.#tasksListComponent);
-
     tasks.forEach((task) => this.#renderTask(task));
   }
 
@@ -95,6 +107,7 @@ export default class BoardPresenter {
     }
 
     this.#renderSort();
+    render(this.#boardComponent, this.#tasksListComponent);
     this.#renderTasks(this.tasks.slice(0, Math.min(tasksCount, this.#renderedTasksCount)));
 
     if (tasksCount > this.#renderedTasksCount) {
