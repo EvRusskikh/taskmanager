@@ -16,3 +16,9 @@ export const FilterType = {
   REPEATING: 'repeating',
   ARCHIVE: 'archive'
 };
+
+export const MenuItem = {
+  ADD_NEW_TASK: {type: 'new-task', name: '+ ADD NEW TASK'},
+  TASKS: {type: 'tasks', name: 'TASKS'},
+  STATISTICS: {type: 'statistics', name: 'STATISTICS'}
+};

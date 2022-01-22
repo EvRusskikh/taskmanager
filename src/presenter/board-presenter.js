@@ -50,6 +50,15 @@ export default class BoardPresenter {
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
+  destroy = () => {
+    this.#clearBoard();
+
+    remove(this.#boardComponent);
+
+    this.#taskModel.removeObserver(this.#handleModelEvent);
+    this.#filterModel.removeObserver(this.#handleModelEvent);
+  }
+
   #handleModelEvent = async (updateType) => {
     switch (updateType) {
       case UpdateType.MAJOR:
