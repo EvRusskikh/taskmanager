@@ -1,5 +1,6 @@
-import {UpdateType} from '../consts';
+import {FilterType, UpdateType} from '../consts';
 import {remove, render} from '../utils/render';
+import {filter} from '../utils/filter';
 import BoardView from '../view/board-view';
 import NoTaskView from '../view/no-task-view';
 import SortView from '../view/sort-view';
@@ -13,6 +14,7 @@ const CARDS_STEP_SIZE = 8;
 export default class BoardPresenter {
   #boardContainer = null;
   #taskModel = null;
+  #filterModel = null;
 
   #boardComponent = new BoardView();
   #tasksListComponent = new TasksView();
@@ -23,15 +25,21 @@ export default class BoardPresenter {
 
   #renderedTasksCount = CARDS_STEP_SIZE;
   #renderedTasks = new Map();
+  #activeFilter = FilterType.ALL;
   #isLoading = true;
 
-  constructor(boardContainer, taskModel) {
+  constructor(boardContainer, taskModel, filterModel) {
     this.#boardContainer = boardContainer;
     this.#taskModel = taskModel;
+    this.#filterModel = filterModel;
   }
 
   get tasks() {
-    return this.#taskModel.tasks;
+    this.#activeFilter = this.#filterModel.filter;
+    const tasks = this.#taskModel.tasks;
+    const filteredTasks = filter[this.#activeFilter](tasks);
+
+    return filteredTasks;
   }
 
   init = () => {
@@ -39,10 +47,15 @@ export default class BoardPresenter {
     this.#renderBoard();
 
     this.#taskModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   #handleModelEvent = async (updateType) => {
     switch (updateType) {
+      case UpdateType.MAJOR:
+        this.#clearBoard();
+        this.#renderBoard();
+        break;
       case UpdateType.INIT:
         this.#isLoading = false;
         remove(this.#loadingComponent);
@@ -91,6 +104,23 @@ export default class BoardPresenter {
 
   #renderTasks = (tasks) => {
     tasks.forEach((task) => this.#renderTask(task));
+  }
+
+  #clearBoard = () => {
+    this.#renderedTasks.forEach((presenter) => presenter.destroy());
+    this.#renderedTasks.clear();
+
+    this.#renderedTasksCount = CARDS_STEP_SIZE;
+
+    remove(this.#loadingComponent);
+
+    remove(this.#sortComponent);
+    remove(this.#tasksListComponent);
+    remove(this.#moreButtonComponent);
+
+    if (this.#noTasksComponent) {
+      remove(this.#noTasksComponent);
+    }
   }
 
   #renderBoard = () => {

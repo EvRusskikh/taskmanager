@@ -27,4 +27,8 @@ export default class TaskPresenter {
     replace(this.#taskComponent, prevTaskComponent);
     remove(prevTaskComponent);
   }
+
+  destroy = () => {
+    remove(this.#taskComponent);
+  }
 }

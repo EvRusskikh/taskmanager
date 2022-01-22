@@ -6,6 +6,7 @@ const createItemTemplate = ({type, count}, activeFilter) => (
     id="filter__${type}"
     class="filter__input visually-hidden"
     name="filter"
+    data-filter="${type}"
     ${type === activeFilter ? 'checked' : ''}
     ${count === 0 ? 'disabled': ''}
   />
@@ -24,14 +25,27 @@ const createFilterTemplate = (filters, activeFilter) => {
 
 export default class FilterView extends AbstractView {
   #filters = [];
-  #activeFilter = 'all';
+  #activeFilter = null;
 
-  constructor(filters) {
+  constructor(filters, activeFilter) {
     super();
     this.#filters = filters;
+    this.#activeFilter = activeFilter;
   }
 
   get template() {
     return createFilterTemplate(this.#filters, this.#activeFilter);
+  }
+
+  setItemClickHandler = (callback) => {
+    this._callback.itemClick = callback;
+    this.element.querySelectorAll('[data-filter]').forEach((item) => {
+      item.addEventListener('click', this.#itemClickHandler);
+    });
+  }
+
+  #itemClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.itemClick(evt.target.closest('[data-filter]').dataset.filter);
   }
 }

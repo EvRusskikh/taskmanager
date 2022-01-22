@@ -1,16 +1,18 @@
-import {FilterType} from '../consts';
+import {FilterType, UpdateType} from '../consts';
 import {filter} from '../utils/filter';
 import {remove, render, replace} from '../utils/render';
 import FilterView from '../view/filter-view';
 
 export default class FilterPresenter {
+  #filterModel = null;
   #tasksModel = null;
 
   #filterContainer = null;
   #filterComponent = null;
 
-  constructor(filterContainer, tasksModel) {
+  constructor(filterContainer, filterModel, tasksModel) {
     this.#filterContainer = filterContainer;
+    this.#filterModel = filterModel;
     this.#tasksModel = tasksModel;
   }
 
@@ -28,9 +30,11 @@ export default class FilterPresenter {
   init = () => {
     const prevFilterComponent = this.#filterComponent;
 
-    this.#filterComponent = new FilterView(this.filters);
+    this.#filterComponent = new FilterView(this.filters, this.#filterModel.filter);
+    this.#filterComponent.setItemClickHandler(this.#handleFilterChange);
 
     this.#tasksModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
 
     if (prevFilterComponent === null) {
       render(this.#filterContainer, this.#filterComponent);
@@ -39,6 +43,14 @@ export default class FilterPresenter {
 
     replace(this.#filterComponent, prevFilterComponent);
     remove(prevFilterComponent);
+  }
+
+  #handleFilterChange = (activeFilter) => {
+    if (this.#filterModel.filter === activeFilter) {
+      return;
+    }
+
+    this.#filterModel.setFilter(UpdateType.MAJOR, activeFilter);
   }
 
   #handleModelEvent = () => {
