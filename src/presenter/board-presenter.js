@@ -78,7 +78,7 @@ export default class BoardPresenter {
   }
 
   #renderNoTasks = () => {
-    this.#noTasksComponent = new NoTaskView();
+    this.#noTasksComponent = new NoTaskView(this.#filterModel.filter);
     render(this.#boardComponent, this.#noTasksComponent);
   }
 
