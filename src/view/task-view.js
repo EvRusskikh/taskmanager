@@ -23,10 +23,14 @@ const createTaskTemplate = ({color, repeatingDays, description, dueDate, isArchi
           <button type="button" class="card__btn card__btn--edit">
             edit
           </button>
-          <button type="button" class="card__btn card__btn--archive ${isDisabled(isArchived)}">
+          <button data-control="archive" type="button"
+            class="card__btn card__btn--archive ${isDisabled(isArchived)}"
+          >
             archive
           </button>
-          <button type="button" class="card__btn card__btn--favorites ${isDisabled(isFavorite)}">
+          <button data-control="favorites" type="button"
+            class="card__btn card__btn--favorites ${isDisabled(isFavorite)}"
+          >
             favorites
           </button>
         </div>
@@ -61,5 +65,17 @@ export default class TaskView extends AbstractView {
 
   get template() {
     return createTaskTemplate(this.#task);
+  }
+
+  setControlClickHandler = (callback) => {
+    this._callback.controlClick = callback;
+    this.element.querySelectorAll('[data-control]').forEach((item) => {
+      item.addEventListener('click', this.#controlClockHandler);
+    });
+  }
+
+  #controlClockHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.controlClick(evt.target.dataset.control);
   }
 }

@@ -28,3 +28,12 @@ export const SortType = {
   DATE_UP: 'DATE up',
   DATE_DOWN: 'DATE down'
 };
+
+export const ControlType = {
+  ARCHIVE: 'archive',
+  FAVORITES: 'favorites'
+};
+
+export const UserAction = {
+  UPDATE_TASK: 'UPDATE_TASK'
+};

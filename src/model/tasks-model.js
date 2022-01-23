@@ -25,6 +25,27 @@ export default class TasksModel extends AbstractObservable {
     this._notify(UpdateType.INIT);
   }
 
+  updateTask = async (updateType, update) => {
+    const index = this.#tasks.findIndex((task) => task.id === update.id);
+
+    if (index === -1) {
+      throw new Error('Can\'t update unexisting task');
+    }
+
+    try {
+      const response = await this.#apiService.updateTask(update);
+      const updatedTask = this.#adaptToClient(response);
+      this.#tasks = [
+        ...this.#tasks.slice(0, index),
+        updatedTask,
+        ...this.#tasks.slice(index + 1),
+      ];
+      this._notify(updateType, updatedTask);
+    } catch (err) {
+      throw new Error('can\'t update task');
+    }
+  }
+
   #adaptToClient = (task) => {
     const adaptedTask = {
       ...task,

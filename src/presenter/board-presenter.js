@@ -1,4 +1,4 @@
-import {FilterType, SortType, UpdateType} from '../consts';
+import {FilterType, SortType, UpdateType, UserAction} from '../consts';
 import {remove, render} from '../utils/render';
 import {filter} from '../utils/filter';
 import {sortTasks} from '../utils/sort';
@@ -8,7 +8,7 @@ import SortView from '../view/sort-view';
 import TasksView from '../view/tasks-view';
 import MoreButtonView from '../view/more-button-view';
 import LoadingView from '../view/loading-view';
-import TaskPresenter from './task-presenter';
+import TaskPresenter, {StateType} from './task-presenter';
 
 const CARDS_STEP_SIZE = 8;
 
@@ -61,7 +61,7 @@ export default class BoardPresenter {
   }
 
   destroy = () => {
-    this.#clearBoard();
+    this.#clearBoard({resetRenderedTaskCount: true, resetSortType: true});
 
     remove(this.#boardComponent);
 
@@ -69,12 +69,30 @@ export default class BoardPresenter {
     this.#filterModel.removeObserver(this.#handleModelEvent);
   }
 
+  #handleViewAction = async (actionType, updateType, update) => {
+    switch (actionType) {
+      case UserAction.UPDATE_TASK:
+        this.#renderedTasks.get(update.id).setViewState(StateType.SAVING);
+        try {
+          await this.#taskModel.updateTask(updateType, update);
+        } catch (err) {
+          this.#renderedTasks.get(update.id).setViewState(StateType.ABORTING);
+        }
+    }
+  }
+
   #handleModelEvent = async (updateType) => {
     switch (updateType) {
-      case UpdateType.MAJOR:
+      case UpdateType.MINOR:
         this.#clearBoard();
         this.#renderBoard();
         break;
+
+      case UpdateType.MAJOR:
+        this.#clearBoard({resetRenderedTaskCount: true, resetSortType: true});
+        this.#renderBoard();
+        break;
+
       case UpdateType.INIT:
         this.#isLoading = false;
         remove(this.#loadingComponent);
@@ -99,7 +117,7 @@ export default class BoardPresenter {
 
     this.#activeSort = activeSort;
 
-    this.#clearBoard();
+    this.#clearBoard({resetRenderedTaskCount: true});
     this.#renderBoard();
   }
 
@@ -130,7 +148,7 @@ export default class BoardPresenter {
   }
 
   #renderTask = (task) => {
-    const taskPresenter = new TaskPresenter(this.#tasksListComponent);
+    const taskPresenter = new TaskPresenter(this.#tasksListComponent, this.#handleViewAction);
     taskPresenter.init(task);
     this.#renderedTasks.set(task.id, taskPresenter);
   }
@@ -139,11 +157,9 @@ export default class BoardPresenter {
     tasks.forEach((task) => this.#renderTask(task));
   }
 
-  #clearBoard = () => {
+  #clearBoard = ({resetRenderedTaskCount = false, resetSortType = false} = {}) => {
     this.#renderedTasks.forEach((presenter) => presenter.destroy());
     this.#renderedTasks.clear();
-
-    this.#renderedTasksCount = CARDS_STEP_SIZE;
 
     remove(this.#loadingComponent);
 
@@ -153,6 +169,16 @@ export default class BoardPresenter {
 
     if (this.#noTasksComponent) {
       remove(this.#noTasksComponent);
+    }
+
+    if (resetRenderedTaskCount) {
+      this.#renderedTasksCount = CARDS_STEP_SIZE;
+    } else {
+      this.#renderedTasksCount = Math.min(this.tasks.length, this.#renderedTasksCount);
+    }
+
+    if (resetSortType) {
+      this.#activeSort = SortType.DEFAULT;
     }
   }
 
