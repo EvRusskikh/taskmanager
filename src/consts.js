@@ -8,6 +8,12 @@ export const UpdateType = {
   INIT: 'INIT'
 };
 
+export const MenuItem = {
+  ADD_NEW_TASK: {type: 'new-task', name: '+ ADD NEW TASK'},
+  TASKS: {type: 'tasks', name: 'TASKS'},
+  STATISTICS: {type: 'statistics', name: 'STATISTICS'}
+};
+
 export const FilterType = {
   ALL: 'all',
   OVERDUE: 'overdue',
@@ -17,8 +23,8 @@ export const FilterType = {
   ARCHIVE: 'archive'
 };
 
-export const MenuItem = {
-  ADD_NEW_TASK: {type: 'new-task', name: '+ ADD NEW TASK'},
-  TASKS: {type: 'tasks', name: 'TASKS'},
-  STATISTICS: {type: 'statistics', name: 'STATISTICS'}
+export const SortType = {
+  DEFAULT: 'DEFAULT',
+  DATE_UP: 'DATE up',
+  DATE_DOWN: 'DATE down'
 };

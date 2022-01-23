@@ -1,22 +1,22 @@
 import AbstractView from './abstract-view';
 
-const createItemTemplate = ({type, count}, activeFilter) => (
+const createItemTemplate = ({type, count}, isActive) => (
   `<input
     type="radio"
     id="filter__${type}"
     class="filter__input visually-hidden"
     name="filter"
     data-filter="${type}"
-    ${type === activeFilter ? 'checked' : ''}
+    ${isActive ? 'checked' : ''}
     ${count === 0 ? 'disabled': ''}
   />
   <label for="filter__${type}" class="filter__label">
-    ${type} <span class="filter__${type}-count">${count}</span></label
-  >`
+    ${type} <span class="filter__${type}-count">${count}</span>
+  </label>`
 );
 
 const createFilterTemplate = (filters, activeFilter) => {
-  const items = filters.map((item) => createItemTemplate(item, activeFilter)).join('\n');
+  const items = filters.map((item) => createItemTemplate(item, item.type === activeFilter)).join('\n');
 
   return `<section class="main__filter filter container">
     ${items}

@@ -1,6 +1,7 @@
-import {FilterType, UpdateType} from '../consts';
+import {FilterType, SortType, UpdateType} from '../consts';
 import {remove, render} from '../utils/render';
 import {filter} from '../utils/filter';
+import {sortTasks} from '../utils/sort';
 import BoardView from '../view/board-view';
 import NoTaskView from '../view/no-task-view';
 import SortView from '../view/sort-view';
@@ -18,14 +19,15 @@ export default class BoardPresenter {
 
   #boardComponent = new BoardView();
   #tasksListComponent = new TasksView();
-  #sortComponent = new SortView();
   #loadingComponent = new LoadingView();
+  #sortComponent = null;
   #noTasksComponent = null;
   #moreButtonComponent = null;
 
   #renderedTasksCount = CARDS_STEP_SIZE;
   #renderedTasks = new Map();
   #activeFilter = FilterType.ALL;
+  #activeSort = SortType.DEFAULT;
   #isLoading = true;
 
   constructor(boardContainer, taskModel, filterModel) {
@@ -38,6 +40,14 @@ export default class BoardPresenter {
     this.#activeFilter = this.#filterModel.filter;
     const tasks = this.#taskModel.tasks;
     const filteredTasks = filter[this.#activeFilter](tasks);
+
+    switch (this.#activeSort) {
+      case SortType.DATE_UP:
+        return sortTasks[SortType.DATE_UP](filteredTasks);
+
+      case SortType.DATE_DOWN:
+        return sortTasks[SortType.DATE_DOWN](filteredTasks);
+    }
 
     return filteredTasks;
   }
@@ -82,7 +92,21 @@ export default class BoardPresenter {
     render(this.#boardComponent, this.#noTasksComponent);
   }
 
+  #handleSortTypeChange = (activeSort) => {
+    if (this.#activeSort === activeSort) {
+      return;
+    }
+
+    this.#activeSort = activeSort;
+
+    this.#clearBoard();
+    this.#renderBoard();
+  }
+
   #renderSort = () => {
+    this.#sortComponent = new SortView(this.#activeSort);
+    this.#sortComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
+
     render(this.#boardComponent, this.#sortComponent);
   }
 
